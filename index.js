@@ -11,21 +11,50 @@ app.use(cors()); // Enable CORS for all origins
 
 // POST endpoint
 app.post('/bfhl', (req, res) => {
-  const requestBody = req.body;
-  const data = requestBody.data;
+  const { data } = req.body;
 
   // Check if `data` is defined and is an array
   if (!Array.isArray(data)) {
-    return res.status(400).json({ is_success: false, error: 'Invalid data format' });
+    return res.status(400).json({
+      is_success: false,
+      user_id: 'john_doe_17091999',
+      email: 'john@xyz.com',
+      roll_number: 'ABCD123',
+      numbers: [],
+      alphabets: [],
+      highest_lowercase_alphabet: []
+    });
   }
 
-  // Process the input data
-  const numbers = data.filter(item => /^[0-9]+$/.test(item));
-  const alphabets = data.filter(item => /^[a-zA-Z]$/.test(item));
-  const highestLowercaseAlphabet = alphabets
-    .filter(item => /^[a-z]$/.test(item))
-    .sort()
-    .slice(-1); // Get the last item in the sorted list (highest in a-z series)
+  // Initialize arrays for filtered data
+  let numbers = [];
+  let alphabets = [];
+  let highestLowercaseAlphabet = [];
+
+  // Iterate through data to filter numbers and alphabets
+  for (let item of data) {
+    if (/^[0-9]+$/.test(item)) {
+      numbers.push(item);
+    } else if (/^[a-zA-Z]$/.test(item)) {
+      alphabets.push(item);
+    }
+  }
+
+  // Determine the highest lowercase alphabet
+  let highest = null;
+  if (alphabets.length > 0) {
+    for (let char of alphabets) {
+      if (/^[a-z]$/.test(char)) {
+        if (highest === null || char > highest) {
+          highest = char;
+        }
+      }
+    }
+  }
+
+  if (highest !== null) {
+    highestLowercaseAlphabet.push(highest);
+  }
 
   // Respond with the processed data
   res.json({
@@ -33,8 +62,8 @@ app.post('/bfhl', (req, res) => {
     user_id: 'john_doe_17091999',
     email: 'john@xyz.com',
     roll_number: 'ABCD123',
-    numbers: numbers,
-    alphabets: alphabets,
+    numbers,
+    alphabets,
     highest_lowercase_alphabet: highestLowercaseAlphabet
   });
 });
